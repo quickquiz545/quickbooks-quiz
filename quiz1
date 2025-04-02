@@ -1,0 +1,119 @@
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, addDoc, query, orderBy, getDocs, onSnapshot } from "firebase/firestore";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+export default function QuizGame() {
+  const [user, setUser] = useState(null);
+  const [question, setQuestion] = useState(null);
+  const [options, setOptions] = useState([]);
+  const [correctAnswer, setCorrectAnswer] = useState("");
+  const [timeLeft, setTimeLeft] = useState(60);
+  const [score, setScore] = useState(0);
+  const [difficulty, setDifficulty] = useState("easy");
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [lifelines, setLifelines] = useState({ fiftyFifty: true, skip: true, hint: true });
+
+  useEffect(() => {
+    fetchQuestion();
+    const unsubscribe = onSnapshot(query(collection(db, "leaderboard"), orderBy("score", "desc")), (snapshot) => {
+      const leaderboardData = snapshot.docs.map(doc => doc.data());
+      setLeaderboard(leaderboardData);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const fetchQuestion = async () => {
+    const response = await fetch(`https://api.example.com/generate-question?difficulty=${difficulty}`);
+    const data = await response.json();
+    setQuestion(data.text);
+    setOptions(data.options);
+    setCorrectAnswer(data.answer);
+  };
+
+  const handleAnswer = async (selected) => {
+    if (selected === correctAnswer) {
+      setScore(score + 10);
+      alert("Correct! +10 Points");
+      adjustDifficulty(true);
+    } else {
+      alert("Wrong Answer");
+      adjustDifficulty(false);
+    }
+    fetchQuestion();
+    setTimeLeft(60);
+  };
+
+  const adjustDifficulty = (isCorrect) => {
+    if (isCorrect) {
+      setDifficulty(prev => prev === "easy" ? "medium" : "hard");
+    } else {
+      setDifficulty(prev => prev === "hard" ? "medium" : "easy");
+    }
+  };
+
+  const saveScore = async () => {
+    if (user) {
+      await addDoc(collection(db, "leaderboard"), {
+        name: user.displayName,
+        score,
+        timestamp: new Date()
+      });
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center p-6">
+      {!user ? (
+        <Button onClick={() => signInWithPopup(auth, provider).then(result => setUser(result.user))}>Sign in with Google</Button>
+      ) : (
+        <div>
+          <p>Welcome, {user.displayName}</p>
+          <Button onClick={() => signOut(auth).then(() => setUser(null))}>Sign Out</Button>
+          <Button onClick={saveScore} className="ml-4">Save Score</Button>
+        </div>
+      )}
+      <Card className="w-full max-w-lg text-center mt-4">
+        <CardContent>
+          <h2 className="text-xl font-bold">{question}</h2>
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            {options.map((option, index) => (
+              <Button key={index} onClick={() => handleAnswer(option)}>
+                {option}
+              </Button>
+            ))}
+          </div>
+          <p className="mt-4 text-red-500">Time Left: {timeLeft}s</p>
+          <p className="mt-2 text-green-500">Score: {score}</p>
+          <p className="mt-2 text-blue-500">Difficulty: {difficulty}</p>
+        </CardContent>
+      </Card>
+      <Card className="w-full max-w-lg text-center mt-6">
+        <CardContent>
+          <h2 className="text-xl font-bold">Global Leaderboard</h2>
+          <ul>
+            {leaderboard.map((entry, index) => (
+              <li key={index}>{entry.name}: {entry.score} points</li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
