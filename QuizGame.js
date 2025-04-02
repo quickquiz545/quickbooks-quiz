@@ -4,12 +4,12 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyCpSZcp31xrLYfAkpvyD9DFRD8mEOsFwnw",
+  authDomain: "qb-quiz.firebaseapp.com",
+  projectId: "qb-quiz",
+  storageBucket: "qb-quiz.appspot.com",
+  messagingSenderId: "374028186064",
+  appId: "1:374028186064:web:b63d6241021d34c17249d5"
 };
 
 const app = initializeApp(firebaseConfig);
