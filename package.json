@@ -9,12 +9,12 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "dependencies": {
-    "firebase": "^9.0.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-scripts": "5.0.1"
-  },
+ "dependencies": {
+  "react": "^18.0.0",
+  "react-dom": "^18.0.0",
+  "react-scripts": "5.0.1",
+  "firebase": "^9.0.0"
+}
   "devDependencies": {},
   "license": "MIT"
 }
