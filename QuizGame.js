@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { questions } from "./questions";
+const { useState } = React;
 
-export default function QuizGame() {
+
+function QuizGame() {
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
@@ -42,3 +42,5 @@ export default function QuizGame() {
     </div>
   );
 }
+
+window.QuizGame = QuizGame;

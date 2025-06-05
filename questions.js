@@ -1,4 +1,4 @@
-export const questions = [
+const questions = [
   {
     text: "Which menu do you use to create a new invoice in QuickBooks Online?",
     options: ["New", "Customers", "Invoices", "Sales"],
@@ -50,3 +50,6 @@ export const questions = [
     answer: "Match your books to bank statements"
   }
 ];
+
+window.questions = questions;
+
